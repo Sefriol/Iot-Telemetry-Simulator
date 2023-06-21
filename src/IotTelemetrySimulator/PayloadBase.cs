@@ -23,7 +23,7 @@
             this.DeviceId = deviceId;
         }
 
-        public abstract (byte[], Dictionary<string, object>) Generate(Dictionary<string, object> variableValues);
+        public abstract (byte[], IDictionary<string, object>) Generate(IDictionary<string, object> variableValues);
 
         public abstract string GetDescription();
     }

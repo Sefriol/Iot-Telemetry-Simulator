@@ -1,4 +1,4 @@
-﻿namespace IotTelemetrySimulator
+namespace IotTelemetrySimulator
 {
     using System;
     using System.Collections.Generic;
@@ -22,7 +22,7 @@
             this.Variables = variables;
         }
 
-        public override (byte[], Dictionary<string, object>) Generate(Dictionary<string, object> variableValues)
+        public override (byte[], IDictionary<string, object>) Generate(IDictionary<string, object> variableValues)
         {
             var nextVariables = this.Variables.NextValues(variableValues);
             var data = this.Template.Create(nextVariables);

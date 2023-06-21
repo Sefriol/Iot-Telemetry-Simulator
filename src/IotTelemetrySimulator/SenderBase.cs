@@ -1,7 +1,8 @@
-﻿namespace IotTelemetrySimulator
+namespace IotTelemetrySimulator
 {
     using System;
     using System.Collections.Generic;
+    using System.Dynamic;
     using System.Threading;
     using System.Threading.Tasks;
     using Newtonsoft.Json;
@@ -13,7 +14,7 @@
 
         private readonly IRandomizer random = new DefaultRandomizer();
         private readonly string deviceId;
-        private Dictionary<string, object> variableValues;
+        private IDictionary<string, object> variableValues;
 
         protected RunnerConfiguration Config { get; }
 
@@ -59,10 +60,8 @@
         {
             if (this.variableValues == null)
             {
-                this.variableValues = new Dictionary<string, object>
-                {
-                    { Constants.DeviceIdValueName, this.deviceId }
-                };
+                this.variableValues = new ExpandoObject();
+                this.variableValues.Add(Constants.DeviceIdValueName, this.deviceId);
             }
 
             var (messageBytes, nextVariableValues) = this.Config.PayloadGenerator.Generate(this.deviceId, this.variableValues);

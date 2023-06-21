@@ -26,7 +26,7 @@
                 .ToDictionary(x => x.DeviceId);
         }
 
-        public (byte[], Dictionary<string, object>) Generate(string deviceId, Dictionary<string, object> variableValues)
+        public (byte[], IDictionary<string, object>) Generate(string deviceId, IDictionary<string, object> variableValues)
         {
             if (this.Payloads.Length == 1)
                 return this.Payloads[0].Generate(variableValues);

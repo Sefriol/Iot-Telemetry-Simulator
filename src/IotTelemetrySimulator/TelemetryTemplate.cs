@@ -7,7 +7,7 @@
 
     // A function that represents a part of the template.
     // It accepts variable values and returns this part of the template with the variables substituted.
-    using TemplateToken = System.Func<System.Collections.Generic.Dictionary<string, object>, string>;
+    using TemplateToken = System.Func<System.Collections.Generic.IDictionary<string, object>, string>;
 
     public class TelemetryTemplate
     {
@@ -35,7 +35,7 @@
         /// <summary>
         /// Replace all variable names in the template with the given variable values.
         /// </summary>
-        public string Create(Dictionary<string, object> variables)
+        public string Create(IDictionary<string, object> variables)
         {
             return string.Join(
                 string.Empty,
@@ -90,7 +90,7 @@
             // spoil all instances of "$.Var12".
             foreach (var varName in variableNames.OrderByDescending(s => s.Length))
             {
-                string Substitute(Dictionary<string, object> variables)
+                string Substitute(IDictionary<string, object> variables)
                 {
                     variables.TryGetValue(varName, out var result);
 

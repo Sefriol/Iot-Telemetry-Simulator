@@ -1,4 +1,4 @@
-﻿namespace IotTelemetrySimulator.Test
+namespace IotTelemetrySimulator.Test
 {
     using System;
     using System.Collections.Generic;
@@ -66,7 +66,7 @@
             var payload = new TemplatedPayload(100, telemetryTemplate, telemetryValues);
 
             var target = new PayloadGenerator(new[] { payload }, new DefaultRandomizer());
-            var variables = new Dictionary<string, object>
+            IDictionary<string, object> variables = new Dictionary<string, object>
             {
                 { Constants.DeviceIdValueName, "mydevice" },
             };
@@ -116,7 +116,7 @@
 
             var target = new PayloadGenerator(new[] { payload }, new DefaultRandomizer());
 
-            var variables = new Dictionary<string, object>
+            IDictionary<string, object> variables = new Dictionary<string, object>
             {
                 { Constants.DeviceIdValueName, "mydevice" },
             };
@@ -180,7 +180,7 @@
                 "{\"val\":\"4\"}",
             };
 
-            var variables = new Dictionary<string, object>
+            IDictionary<string, object> variables = new Dictionary<string, object>
             {
                 { Constants.DeviceIdValueName, "mydevice" },
             };
@@ -242,7 +242,7 @@
                 "{\"val1\":\"1004\",\"val2\":\"4\"}",
             };
 
-            var variables = new Dictionary<string, object>
+            IDictionary<string, object> variables = new Dictionary<string, object>
             {
                 { Constants.DeviceIdValueName, "mydevice" },
             };
@@ -311,7 +311,7 @@
                 "{\"val1\":\"1004\",\"val2\":\"4\",\"counter_3\":\"1000004\"}",
             };
 
-            var variables = new Dictionary<string, object>
+            IDictionary<string, object> variables = new Dictionary<string, object>
             {
                 { Constants.DeviceIdValueName, "mydevice" },
             };

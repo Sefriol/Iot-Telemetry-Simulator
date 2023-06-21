@@ -1,7 +1,8 @@
-﻿namespace IotTelemetrySimulator
+namespace IotTelemetrySimulator
 {
     using System;
     using System.Collections.Generic;
+    using System.Dynamic;
     using System.Linq;
 
     public class TelemetryValues
@@ -17,9 +18,10 @@
             this.machineName = Environment.MachineName;
         }
 
-        public Dictionary<string, object> NextValues(Dictionary<string, object> previous)
+        public IDictionary<string, object> NextValues(IDictionary<string, object> previous)
         {
-            var next = new Dictionary<string, object>();
+            dynamic globals = new ExpandoObject();
+            var next = (IDictionary<string, object>)globals;
             var now = DateTime.Now;
 
             ulong iterationNumber = 0;
@@ -147,8 +149,8 @@
         /// This way we can keep the a counter variable incrementally correctly if the sequence did not use it in current iteration.
         /// </summary>
         private static void ResetNotUsedReferencedVariables(
-            Dictionary<string, object> previous,
-            Dictionary<string, object> next,
+            IDictionary<string, object> previous,
+            IDictionary<string, object> next,
             IEnumerable<string> notUsedVariables)
         {
             foreach (var notUsedVariable in notUsedVariables)

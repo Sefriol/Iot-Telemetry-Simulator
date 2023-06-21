@@ -17,7 +17,7 @@
             this.Payload = payload;
         }
 
-        public override (byte[], Dictionary<string, object>) Generate(Dictionary<string, object> variableValues)
+        public override (byte[], IDictionary<string, object>) Generate(IDictionary<string, object> variableValues)
         {
             return (this.Payload, variableValues);
         }
