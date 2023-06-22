@@ -1,4 +1,4 @@
-﻿namespace IotTelemetrySimulator
+namespace IotTelemetrySimulator
 {
     public interface IRandomizer
     {
@@ -11,5 +11,7 @@
         double NextDouble();
 
         double NextDouble(double min, double max);
+
+        double NextBoxMullerDouble(double mean = 0, double std = 1);
     }
 }

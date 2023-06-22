@@ -73,6 +73,10 @@ namespace IotTelemetrySimulator
                         next[val.Name] = this.random.NextDouble();
                     }
                 }
+                else if (val.RandomBoxMuller)
+                {
+                    next[val.Name] = this.random.NextBoxMullerDouble(val.Mean.Value, val.Std.Value);
+                }
                 else if (val.CustomLengthString != null)
                 {
                     next[val.Name] = this.CreateRandomString(val.CustomLengthString.Value);

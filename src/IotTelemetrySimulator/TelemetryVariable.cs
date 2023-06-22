@@ -1,4 +1,4 @@
-﻿namespace IotTelemetrySimulator
+namespace IotTelemetrySimulator
 {
     using System;
     using System.Collections.Generic;
@@ -17,6 +17,15 @@
 
         [JsonProperty("randomDouble")]
         public bool RandomDouble { get; set; }
+
+        [JsonProperty("randomBoxMuller")]
+        public bool RandomBoxMuller { get; set; }
+
+        [JsonProperty("mean")]
+        public double? Mean { get; set; }
+
+        [JsonProperty("std")]
+        public double? Std { get; set; }
 
         [JsonProperty("max")]
         public double? Max { get; set; }
