@@ -1,7 +1,7 @@
 ﻿namespace IotTelemetrySimulator
 {
     using System;
-    using System.Collections.Generic;
+    using System.Dynamic;
 
     public abstract class PayloadBase
     {
@@ -23,7 +23,7 @@
             this.DeviceId = deviceId;
         }
 
-        public abstract (byte[], IDictionary<string, object>) Generate(IDictionary<string, object> variableValues);
+        public abstract (byte[], ExpandoObject) Generate(ExpandoObject variableValues);
 
         public abstract string GetDescription();
     }

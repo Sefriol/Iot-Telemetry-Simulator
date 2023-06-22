@@ -9,6 +9,9 @@ namespace IotTelemetrySimulator
         [JsonProperty("name")]
         public string Name { get; set; }
 
+        [JsonProperty("evaluate")]
+        public string Evaluate { get; set; }
+
         [JsonProperty("random")]
         public bool Random { get; set; }
 

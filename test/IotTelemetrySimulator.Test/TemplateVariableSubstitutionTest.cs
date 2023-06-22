@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Dynamic;
     using System.Linq;
     using Xunit;
 
@@ -53,8 +54,8 @@
         [Theory]
         [MemberData(nameof(GetTestData))]
         public void ShouldSubstituteVariablesCorrectly(
-            Dictionary<string, object> previousValues,
-            Dictionary<string, object> vars,
+            ExpandoObject previousValues,
+            ExpandoObject vars,
             string template,
             string expectedPayload)
         {
@@ -78,20 +79,30 @@
         public static IEnumerable<object[]> GetTestData()
         {
             // Should convert variable values to string
+            var obj1 = new ExpandoObject();
+            var dict1 = (IDictionary<string, object>)obj1;
             var customObj = new CustomClass("some_data");
+            dict1.Add("name", "World");
+            dict1.Add("var1", customObj);
+            dict1.Add("var2", -0.5);
+            dict1.Add("var3", string.Empty);
             yield return new object[]
             {
                 null,
-                new Dictionary<string, object> { { "name", "World" }, { "var1", customObj }, { "var2", -0.5 }, { "var3", string.Empty } },
+                obj1,
                 "Hello, $.name! I like $.var1, $.var2 and $.var3, $.name.",
                 $"Hello, World! I like some_data, -0.5 and , World.",
             };
 
             // Should ignore extra variables
+            var obj2 = new ExpandoObject();
+            var dict2 = (IDictionary<string, object>)obj2;
+            dict2.Add("var1", 1);
+            dict2.Add("var2", 2);
             yield return new object[]
             {
                 null,
-                new Dictionary<string, object> { { "var1", 1 }, { "var2", 2 } },
+                obj2,
                 "Only $.var1",
                 "Only 1",
             };
@@ -100,43 +111,60 @@
             yield return new object[]
             {
                 null,
-                new Dictionary<string, object>(),
+                new ExpandoObject(),
                 "$.something",
                 "$.something",
             };
 
             // Should ignore non-existent variables in the template
+            var obj3 = new ExpandoObject();
+            var dict3 = (IDictionary<string, object>)obj3;
+            dict3.Add("var1", 1);
             yield return new object[]
             {
                 null,
-                new Dictionary<string, object> { { "var1", 1 } },
+                obj3,
                 "$.var1 $.var",
                 "1 $.var",
             };
 
             // ..even with the special name
+            var obj4 = new ExpandoObject();
+            var dict4 = (IDictionary<string, object>)obj4;
+            dict4.Add("var1", 1);
             yield return new object[]
             {
                 null,
-                new Dictionary<string, object> { { "var1", 1 } },
+                obj4,
                 $"$.{Constants.DeviceIdValueName} $.var1 $.var",
                 $"$.{Constants.DeviceIdValueName} 1 $.var",
             };
 
             // Should substitute longer names first
+            var obj5 = new ExpandoObject();
+            var dict5 = (IDictionary<string, object>)obj5;
+            dict5.Add("var1", 1);
+            dict5.Add("var", 2);
+            dict5.Add("var11", 3);
             yield return new object[]
             {
                 null,
-                new Dictionary<string, object> { { "var1", 1 }, { "var", 2 }, { "var11", 3 } },
+                obj5,
                 "$.var1$.var11, $.var $.var$.var1$.var11!",
                 "13, 2 213!",
             };
 
             // Should substitute DeviceID if it's in the previous values
+            var objd = new ExpandoObject();
+            var dictd = (IDictionary<string, object>)objd;
+            dictd.Add(Constants.DeviceIdValueName, "dummy");
+            var obj6 = new ExpandoObject();
+            var dict6 = (IDictionary<string, object>)obj6;
+            dict6.Add("var1", 1);
             yield return new object[]
             {
-                new Dictionary<string, object> { { Constants.DeviceIdValueName, "dummy" } },
-                new Dictionary<string, object> { { "var1", 1 } },
+                dictd,
+                obj6,
                 $"$.{Constants.DeviceIdValueName} $.var1!",
                 "dummy 1!",
             };

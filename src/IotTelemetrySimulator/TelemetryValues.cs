@@ -4,6 +4,10 @@ namespace IotTelemetrySimulator
     using System.Collections.Generic;
     using System.Dynamic;
     using System.Linq;
+    using System.Reflection;
+    using Microsoft.CodeAnalysis;
+    using Microsoft.CodeAnalysis.CSharp.Scripting;
+    using Microsoft.CodeAnalysis.Scripting;
 
     public class TelemetryValues
     {
@@ -18,14 +22,16 @@ namespace IotTelemetrySimulator
             this.machineName = Environment.MachineName;
         }
 
-        public IDictionary<string, object> NextValues(IDictionary<string, object> previous)
+        public ExpandoObject NextValues(ExpandoObject previous)
         {
             dynamic globals = new ExpandoObject();
+            var prev = (IDictionary<string, object>)previous;
             var next = (IDictionary<string, object>)globals;
             var now = DateTime.Now;
+            var dynamics = new Dictionary<string, TelemetryVariable>();
 
             ulong iterationNumber = 0;
-            if (previous != null && previous.TryGetValue(Constants.IterationNumberValueName, out var previousIterationNumber))
+            if (previous != null && prev.TryGetValue(Constants.IterationNumberValueName, out var previousIterationNumber))
             {
                 iterationNumber = (ulong)previousIterationNumber + 1;
             }
@@ -40,7 +46,7 @@ namespace IotTelemetrySimulator
 
             if (previous != null)
             {
-                next[Constants.DeviceIdValueName] = previous[Constants.DeviceIdValueName];
+                next[Constants.DeviceIdValueName] = prev[Constants.DeviceIdValueName];
             }
 
             var hasSequenceVars = false;
@@ -77,6 +83,10 @@ namespace IotTelemetrySimulator
                 {
                     next[val.Name] = this.random.NextBoxMullerDouble(val.Mean.Value, val.Std.Value);
                 }
+                else if (val.Evaluate != null)
+                {
+                    dynamics[val.Name] = val;
+                }
                 else if (val.CustomLengthString != null)
                 {
                     next[val.Name] = this.CreateRandomString(val.CustomLengthString.Value);
@@ -108,6 +118,24 @@ namespace IotTelemetrySimulator
                         next[val.Name] = val.Min == null ? 1 : (int)val.Min;
                     }
                 }
+            }
+
+            var refs = new List<MetadataReference>
+            {
+                MetadataReference.CreateFromFile(typeof(Microsoft.CSharp.RuntimeBinder.RuntimeBinderException).GetTypeInfo().Assembly.Location),
+                MetadataReference.CreateFromFile(typeof(System.Runtime.CompilerServices.DynamicAttribute).GetTypeInfo().Assembly.Location)
+            };
+
+            foreach (var (key, val) in dynamics)
+            {
+                var script = CSharpScript.Create(val.Evaluate, options: ScriptOptions.Default.AddReferences(refs), globalsType: typeof(ArgsWrapper));
+                if (!prev.ContainsKey(key))
+                {
+                    prev.Add(key, val.Min ?? 0);
+                }
+
+                var g = new ArgsWrapper { Variables = globals, Previous = previous };
+                next[key] = script.RunAsync(g).Result.ReturnValue;
             }
 
             // We generate values of sequence vars after the non-sequence vars, because
@@ -145,7 +173,7 @@ namespace IotTelemetrySimulator
                 ResetNotUsedReferencedVariables(previous, next, notUsedSequenceVariables);
             }
 
-            return next;
+            return globals;
         }
 
         /// <summary>
