@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Dynamic;
     using System.Linq;
 
     public class PayloadGenerator
@@ -26,7 +27,7 @@
                 .ToDictionary(x => x.DeviceId);
         }
 
-        public (byte[], IDictionary<string, object>) Generate(string deviceId, IDictionary<string, object> variableValues)
+        public (byte[], ExpandoObject) Generate(string deviceId, ExpandoObject variableValues)
         {
             if (this.Payloads.Length == 1)
                 return this.Payloads[0].Generate(variableValues);

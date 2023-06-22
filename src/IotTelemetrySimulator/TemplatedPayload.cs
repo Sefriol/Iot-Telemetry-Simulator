@@ -1,7 +1,6 @@
-namespace IotTelemetrySimulator
+﻿namespace IotTelemetrySimulator
 {
-    using System;
-    using System.Collections.Generic;
+    using System.Dynamic;
     using System.Text;
 
     public class TemplatedPayload : PayloadBase
@@ -22,7 +21,7 @@ namespace IotTelemetrySimulator
             this.Variables = variables;
         }
 
-        public override (byte[], IDictionary<string, object>) Generate(IDictionary<string, object> variableValues)
+        public override (byte[], ExpandoObject) Generate(ExpandoObject variableValues)
         {
             var nextVariables = this.Variables.NextValues(variableValues);
             var data = this.Template.Create(nextVariables);

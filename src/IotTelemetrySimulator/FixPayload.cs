@@ -1,6 +1,6 @@
 ﻿namespace IotTelemetrySimulator
 {
-    using System.Collections.Generic;
+    using System.Dynamic;
 
     public class FixPayload : PayloadBase
     {
@@ -17,7 +17,7 @@
             this.Payload = payload;
         }
 
-        public override (byte[], IDictionary<string, object>) Generate(IDictionary<string, object> variableValues)
+        public override (byte[], ExpandoObject) Generate(ExpandoObject variableValues)
         {
             return (this.Payload, variableValues);
         }

@@ -1,7 +1,8 @@
-namespace IotTelemetrySimulator.Test
+﻿namespace IotTelemetrySimulator.Test
 {
     using System;
     using System.Collections.Generic;
+    using System.Dynamic;
     using System.Text;
     using Moq;
     using Xunit;
@@ -66,17 +67,17 @@ namespace IotTelemetrySimulator.Test
             var payload = new TemplatedPayload(100, telemetryTemplate, telemetryValues);
 
             var target = new PayloadGenerator(new[] { payload }, new DefaultRandomizer());
-            IDictionary<string, object> variables = new Dictionary<string, object>
-            {
-                { Constants.DeviceIdValueName, "mydevice" },
-            };
+            var variables = new ExpandoObject();
+            var dictionary = (IDictionary<string, object>)variables;
+            dictionary.Add(Constants.DeviceIdValueName, "mydevice");
 
             var minValue = min ?? 1;
 
             for (int i = 0; i < 10; i += step ?? 1)
             {
                 (_, variables) = target.Generate(null, variables);
-                variables.TryGetValue("Counter", out var o);
+                dictionary = variables;
+                dictionary.TryGetValue("Counter", out var o);
                 var result = Convert.ToInt32(o);
 
                 if (i + minValue > max)
@@ -116,17 +117,17 @@ namespace IotTelemetrySimulator.Test
 
             var target = new PayloadGenerator(new[] { payload }, new DefaultRandomizer());
 
-            IDictionary<string, object> variables = new Dictionary<string, object>
-            {
-                { Constants.DeviceIdValueName, "mydevice" },
-            };
+            var variables = new ExpandoObject();
+            var dictionary = (IDictionary<string, object>)variables;
+            dictionary.Add(Constants.DeviceIdValueName, "mydevice");
 
             if (max == null || min == null)
             {
                 for (int i = 0; i < 10; i++)
                 {
                     (_, variables) = target.Generate(null, variables);
-                    variables.TryGetValue("Value", out var o);
+                    dictionary = variables;
+                    dictionary.TryGetValue("Value", out var o);
                     Assert.IsType<double>(o);
                 }
             }
@@ -135,7 +136,8 @@ namespace IotTelemetrySimulator.Test
                 for (int i = 0; i < 10; i++)
                 {
                     (_, variables) = target.Generate(null, variables);
-                    variables.TryGetValue("Value", out var o);
+                    dictionary = variables;
+                    dictionary.TryGetValue("Value", out var o);
                     var result = Convert.ToDouble(o);
                     Assert.True(result >= min && result <= max);
                 }
@@ -180,10 +182,9 @@ namespace IotTelemetrySimulator.Test
                 "{\"val\":\"4\"}",
             };
 
-            IDictionary<string, object> variables = new Dictionary<string, object>
-            {
-                { Constants.DeviceIdValueName, "mydevice" },
-            };
+            var variables = new ExpandoObject();
+            var dictionary = (IDictionary<string, object>)variables;
+            dictionary.Add(Constants.DeviceIdValueName, "mydevice");
 
             byte[] result;
             foreach (var expectedValue in expectedValues)
@@ -242,10 +243,9 @@ namespace IotTelemetrySimulator.Test
                 "{\"val1\":\"1004\",\"val2\":\"4\"}",
             };
 
-            IDictionary<string, object> variables = new Dictionary<string, object>
-            {
-                { Constants.DeviceIdValueName, "mydevice" },
-            };
+            var variables = new ExpandoObject();
+            var dictionary = (IDictionary<string, object>)variables;
+            dictionary.Add(Constants.DeviceIdValueName, "mydevice");
 
             byte[] result;
             foreach (var expectedValue in expectedValues)
@@ -311,10 +311,9 @@ namespace IotTelemetrySimulator.Test
                 "{\"val1\":\"1004\",\"val2\":\"4\",\"counter_3\":\"1000004\"}",
             };
 
-            IDictionary<string, object> variables = new Dictionary<string, object>
-            {
-                { Constants.DeviceIdValueName, "mydevice" },
-            };
+            var variables = new ExpandoObject();
+            var dictionary = (IDictionary<string, object>)variables;
+            dictionary.Add(Constants.DeviceIdValueName, "mydevice");
 
             byte[] result;
             foreach (var expectedValue in expectedValues)
@@ -373,10 +372,67 @@ namespace IotTelemetrySimulator.Test
                 "{\"val1\":\"1002\",\"array_var\":[],\"array_fix\":[\"FixCategory\"]}",
             };
 
-            var variables = new Dictionary<string, object>
+            var variables = new ExpandoObject();
+            var dictionary = (IDictionary<string, object>)variables;
+            dictionary.Add(Constants.DeviceIdValueName, "mydevice");
+
+            byte[] result;
+            foreach (var expectedValue in expectedValues)
             {
-                { Constants.DeviceIdValueName, "mydevice" },
+                (result, variables) = target.Generate(null, variables);
+                Assert.NotEmpty(variables);
+                Assert.Equal(expectedValue, Encoding.UTF8.GetString(result));
+            }
+        }
+
+        [Fact]
+        public void Read_Eval_Print_Loop()
+        {
+            var telemetryTemplate = new TelemetryTemplate(
+                "$.SimpleEvalString $.VariableEvalString $.PreviousTest",
+                new[] { "Value", "SimpleEvalString", "VariableEvalString", "PreviousTest" });
+            var telemetryVariables = new[]
+            {
+                new TelemetryVariable
+                {
+                    Name = "Value",
+                    Step = 1.0
+                },
+
+                new TelemetryVariable
+                {
+                    Name = "SimpleEvalString",
+                    Evaluate = "1 + 3"
+                },
+                new TelemetryVariable
+                {
+                    Name = "VariableEvalString",
+                    Evaluate = "Variables.Value + Variables.SimpleEvalString"
+                },
+                new TelemetryVariable
+                {
+                    Name = "PreviousTest",
+                    Min = 10,
+                    Evaluate = "Previous.PreviousTest + Variables.Value"
+                }
             };
+            var telemetryValues = new TelemetryValues(telemetryVariables);
+
+            var payload = new TemplatedPayload(100, telemetryTemplate, telemetryValues);
+
+            var target = new PayloadGenerator(new[] { payload }, new DefaultRandomizer());
+
+            var expectedValues = new[]
+            {
+                "4 5 11",
+                "4 6 13",
+                "4 7 16",
+                "4 8 20"
+            };
+
+            var variables = new ExpandoObject();
+            var dictionary = (IDictionary<string, object>)variables;
+            dictionary.Add(Constants.DeviceIdValueName, "mydevice");
 
             byte[] result;
             foreach (var expectedValue in expectedValues)

@@ -1,8 +1,8 @@
 namespace IotTelemetrySimulator.Test
 {
-    using System;
     using System.Collections.Generic;
     using System.Configuration;
+    using System.Dynamic;
     using System.Text;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.Logging.Abstractions;
@@ -186,10 +186,9 @@ namespace IotTelemetrySimulator.Test
 
             var templatedPayload = Assert.IsType<TemplatedPayload>(target.PayloadGenerator.Payloads[0]);
 
-            var device1Vars = new Dictionary<string, object>
-            {
-                { Constants.DeviceIdValueName, "device0001" },
-            };
+            var device1Vars = new ExpandoObject();
+            var dictionary1 = (IDictionary<string, object>)device1Vars;
+            dictionary1.Add(Constants.DeviceIdValueName, "device0001");
             var (device1Message, _) = templatedPayload.Generate(device1Vars);
             var device1MessageMap = JsonConvert.DeserializeObject<Dictionary<string, string>>(Encoding.UTF8.GetString(device1Message));
             Assert.Equal(2, device1MessageMap.Count);
@@ -197,10 +196,9 @@ namespace IotTelemetrySimulator.Test
             Assert.Equal("20", device1MessageMap["a_second_value"]);
 
             var fixPayload = Assert.IsType<FixPayload>(target.PayloadGenerator.Payloads[1]);
-            var device2Vars = new Dictionary<string, object>
-            {
-                { Constants.DeviceIdValueName, "device0002" },
-            };
+            var device2Vars = new ExpandoObject();
+            var dictionary2 = (IDictionary<string, object>)device2Vars;
+            dictionary2.Add(Constants.DeviceIdValueName, "device0002");
             var (device2Message, _) = fixPayload.Generate(device2Vars);
             var device2MessageMap = JsonConvert.DeserializeObject<Dictionary<string, string>>(Encoding.UTF8.GetString(device2Message));
             Assert.Single(device2MessageMap);
