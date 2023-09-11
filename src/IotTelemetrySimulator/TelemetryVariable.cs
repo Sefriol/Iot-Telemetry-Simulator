@@ -1,4 +1,4 @@
-namespace IotTelemetrySimulator
+﻿namespace IotTelemetrySimulator
 {
     using System;
     using System.Collections.Generic;
@@ -37,7 +37,7 @@ namespace IotTelemetrySimulator
         public double? Min { get; set; }
 
         [JsonProperty("step")]
-        public int? Step { get; set; }
+        public double? Step { get; set; }
 
         [JsonProperty("customLengthString")]
         public int? CustomLengthString { get; set; }
