@@ -1,4 +1,4 @@
-namespace IotTelemetrySimulator
+﻿namespace IotTelemetrySimulator
 {
     using System;
     using System.Collections.Generic;
@@ -97,25 +97,25 @@ namespace IotTelemetrySimulator
                 }
                 else
                 {
-                    if (previous != null && previous.TryGetValue(val.Name, out var prevValue))
+                    if (previous != null && prev.TryGetValue(val.Name, out var prevValue))
                     {
-                        var step = val.Step ?? 1;
-                        var maxThres = val.Max ?? int.MaxValue;
+                        var step = val.Step ?? 1.0;
+                        var maxThres = val.Max ?? double.MaxValue;
 
                         switch (prevValue)
                         {
-                            case int prevIntValue when prevIntValue > maxThres - step:
-                                next[val.Name] = val.Min == null ? 1 : (int)val.Min;
+                            case double preDValue when preDValue > maxThres - step:
+                                next[val.Name] = val.Min == null ? 1 : (double)val.Min;
                                 break;
 
-                            case int prevIntValue:
-                                next[val.Name] = prevIntValue + step;
+                            case double preDValue:
+                                next[val.Name] = preDValue + step;
                                 break;
                         }
                     }
                     else
                     {
-                        next[val.Name] = val.Min == null ? 1 : (int)val.Min;
+                        next[val.Name] = val.Min ?? 1;
                     }
                 }
             }
