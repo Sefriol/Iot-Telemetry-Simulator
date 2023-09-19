@@ -22,7 +22,7 @@ jobs:
       run: dotnet test
     
     - name: Bump version and push tag
-      uses: anothrNick/github-tag-action@1.64.0
+      uses: anothrNick/github-tag-action@1.67.0
       id: new_version
       env:
         RELEASE_BRANCHES: master
