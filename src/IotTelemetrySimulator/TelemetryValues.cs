@@ -22,6 +22,14 @@
             this.machineName = Environment.MachineName;
         }
 
+        private List<MetadataReference> refs = new ()
+        {
+            MetadataReference.CreateFromFile(typeof(Microsoft.CSharp.RuntimeBinder.RuntimeBinderException).GetTypeInfo().Assembly.Location),
+            MetadataReference.CreateFromFile(typeof(System.Runtime.CompilerServices.DynamicAttribute).GetTypeInfo().Assembly.Location)
+        };
+
+        private Dictionary<string, Script> scripts = new ();
+
         public ExpandoObject NextValues(ExpandoObject previous)
         {
             dynamic globals = new ExpandoObject();
@@ -120,18 +128,18 @@
                 }
             }
 
-            var refs = new List<MetadataReference>
-            {
-                MetadataReference.CreateFromFile(typeof(Microsoft.CSharp.RuntimeBinder.RuntimeBinderException).GetTypeInfo().Assembly.Location),
-                MetadataReference.CreateFromFile(typeof(System.Runtime.CompilerServices.DynamicAttribute).GetTypeInfo().Assembly.Location)
-            };
-
             foreach (var (key, val) in dynamics)
             {
-                var script = CSharpScript.Create(val.Evaluate, options: ScriptOptions.Default.AddReferences(refs), globalsType: typeof(ArgsWrapper));
+                Script script;
                 if (!prev.ContainsKey(key))
                 {
                     prev.Add(key, val.Min ?? 0);
+                    script = CSharpScript.Create(val.Evaluate, options: ScriptOptions.Default.AddReferences(this.refs), globalsType: typeof(ArgsWrapper));
+                    this.scripts[key] = script;
+                }
+                else
+                {
+                    script = this.scripts[key];
                 }
 
                 var g = new ArgsWrapper { Variables = globals, Previous = previous };
